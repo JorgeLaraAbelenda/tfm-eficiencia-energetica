@@ -1,0 +1,1500 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cuestionario de auditoría energética</title>
+  <style>
+    :root {
+      --ink: #1a2420;
+      --muted: #5c6b64;
+      --line: #d5ddd6;
+      --paper: #f4f1ea;
+      --card: #fffcf7;
+      --green: #0e5c45;
+      --green-soft: #e5f2ec;
+      --sand: #efe6d4;
+      --error: #8d2b2b;
+      --error-bg: #f8e8e4;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        radial-gradient(900px 420px at 100% -10%, #dcece3 0%, transparent 55%),
+        linear-gradient(180deg, #f7f4ee 0%, var(--paper) 40%, #e7eee8 100%);
+      font-family: "Segoe UI", "Avenir Next", sans-serif;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      gap: 24px;
+      align-items: flex-end;
+      padding: 28px 40px 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .eyebrow {
+      margin: 0 0 6px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      font-size: 12px;
+      color: var(--green);
+      font-weight: 700;
+    }
+
+    h1 {
+      margin: 0;
+      font-family: Georgia, "Iowan Old Style", serif;
+      font-size: 32px;
+      font-weight: 600;
+      letter-spacing: -0.03em;
+    }
+
+    .file-status {
+      margin: 0;
+      max-width: 340px;
+      text-align: right;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(280px, 0.8fr);
+      gap: 28px;
+      padding: 28px 40px 48px;
+    }
+
+    .steps {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+
+    .step {
+      flex: 1;
+      height: 6px;
+      border: 0;
+      border-radius: 99px;
+      background: #ddd6c8;
+      padding: 0;
+      cursor: pointer;
+    }
+
+    .step.done { background: var(--green); }
+    .step.current { background: #c4a15a; }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 28px;
+      box-shadow: 0 16px 40px rgba(26, 36, 32, 0.05);
+    }
+
+    .question {
+      margin: 0 0 18px;
+      font-family: Georgia, "Iowan Old Style", serif;
+      font-size: 22px;
+      line-height: 1.35;
+      font-weight: 600;
+    }
+
+    label.field {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--muted);
+      font-size: 13px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      border: 1px solid #c9d2cb;
+      background: #fff;
+      border-radius: 12px;
+      padding: 14px 16px;
+      font: inherit;
+      font-size: 18px;
+      color: var(--ink);
+    }
+
+    input[type="text"]:focus {
+      outline: 2px solid #b7d7c8;
+      border-color: var(--green);
+    }
+
+    .options { display: grid; gap: 10px; }
+
+    .option {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 12px;
+      align-items: start;
+      width: 100%;
+      text-align: left;
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 14px;
+      padding: 14px 16px;
+      cursor: pointer;
+      font: inherit;
+      color: inherit;
+    }
+
+    .option:hover { border-color: #9db8ab; }
+
+    .option.selected {
+      border-color: var(--green);
+      background: var(--green-soft);
+    }
+
+    .num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: var(--sand);
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .option strong { display: block; margin-bottom: 4px; }
+    .option span { color: var(--muted); font-size: 14px; line-height: 1.4; }
+
+    .error {
+      display: none;
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: var(--error-bg);
+      color: var(--error);
+      line-height: 1.45;
+    }
+
+    .error.show { display: block; }
+
+    .notice {
+      display: none;
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: var(--sand);
+      line-height: 1.45;
+    }
+
+    .notice.show { display: block; }
+
+    .ayuda {
+      margin: -6px 0 16px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .procesando, .resultado {
+      display: grid;
+      justify-items: center;
+      gap: 10px;
+      padding: 28px 8px 12px;
+      text-align: center;
+    }
+
+    .resultado {
+      justify-items: stretch;
+      text-align: left;
+    }
+
+    .spinner {
+      width: 46px;
+      height: 46px;
+      border: 3px solid #d9e3dc;
+      border-top-color: var(--green);
+      border-radius: 50%;
+      animation: girar 0.8s linear infinite;
+    }
+
+    @keyframes girar { to { transform: rotate(360deg); } }
+
+    .procesando h2, .resultado h2 {
+      margin: 0;
+      font-family: Georgia, "Iowan Old Style", serif;
+    }
+
+    .procesando p { margin: 0; color: var(--muted); line-height: 1.45; }
+
+    .metricas {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin: 8px 0 18px;
+    }
+
+    .metrica {
+      background: var(--green-soft);
+      border-radius: 12px;
+      padding: 12px 14px;
+    }
+
+    .metrica span { display: block; color: var(--muted); font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; }
+    .metrica strong { display: block; margin-top: 4px; font-size: 20px; }
+
+    .resultado h3 { margin: 18px 0 8px; font-size: 18px; }
+    .prosa { white-space: pre-wrap; line-height: 1.55; margin: 0; }
+
+    #visorInforme {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      display: flex;
+      flex-direction: column;
+      background: #e7eee8;
+    }
+
+    #visorInforme .barra {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 16px;
+      background: #fffcf7;
+      border-bottom: 1px solid var(--line);
+    }
+
+    #visorInforme iframe { flex: 1; width: 100%; border: 0; background: white; }
+
+    .actions {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 22px;
+      position: sticky;
+      bottom: 0;
+      padding-top: 14px;
+      background: linear-gradient(180deg, rgba(255, 252, 247, 0), var(--card) 28%);
+    }
+
+    button.primary, button.ghost {
+      border-radius: 999px;
+      padding: 12px 18px;
+      font: inherit;
+      font-weight: 650;
+      cursor: pointer;
+    }
+
+    button.primary {
+      border: 0;
+      background: var(--green);
+      color: white;
+    }
+
+    button.ghost {
+      border: 1px solid var(--line);
+      background: transparent;
+      color: var(--ink);
+    }
+
+    button:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    aside h2 {
+      margin: 0 0 12px;
+      font-size: 16px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 10px 8px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+    }
+
+    th { color: var(--muted); font-weight: 650; font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; }
+
+    .empty { color: var(--muted); margin: 0; }
+
+    .dictamen { margin-top: 18px; }
+    .dictamen li { margin: 8px 0; line-height: 1.45; }
+
+    @media (max-width: 900px) {
+      header, main { padding-left: 18px; padding-right: 18px; }
+      header, main { display: block; }
+      .file-status { text-align: left; margin-top: 12px; }
+      h1 { font-size: 26px; }
+      .question { font-size: 22px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <p class="eyebrow">Auditoría energética residencial</p>
+      <h1>Cuestionario de la vivienda</h1>
+    </div>
+    <p class="file-status" id="fileStatus">Cada respuesta válida se escribe en cuestionario_vivienda.xlsx, en esta carpeta.</p>
+  </header>
+  <main>
+    <section>
+      <div class="steps" id="steps" aria-label="Progreso"></div>
+      <article class="card" id="card"></article>
+    </section>
+    <aside class="card">
+      <h2>Resumen de respuestas</h2>
+      <p class="empty" id="emptyDict">Todavía no hay respuestas.</p>
+      <table id="dictTable" hidden>
+        <thead>
+          <tr>
+            <th>Pregunta</th>
+            <th>Contestación</th>
+          </tr>
+        </thead>
+        <tbody id="dictBody"></tbody>
+      </table>
+      <div class="dictamen" id="dictamen" hidden></div>
+      <div class="actions">
+        <button class="ghost" type="button" id="downloadBtn">Descargar copia</button>
+      </div>
+    </aside>
+  </main>
+  <script src="municipios_ine.js"></script>
+  <script>
+    const ANIO_ACTUAL = 2026;
+    const ARCHIVO = "cuestionario_vivienda.xlsx";
+
+    const PROVINCIAS = {
+      "alava": ["Álava", "D"], "araba": ["Álava", "D"],
+      "albacete": ["Albacete", "D"],
+      "alicante": ["Alicante", "B"], "alacant": ["Alicante", "B"],
+      "almeria": ["Almería", "A"],
+      "asturias": ["Asturias", "C"],
+      "avila": ["Ávila", "E"],
+      "badajoz": ["Badajoz", "D"],
+      "barcelona": ["Barcelona", "C"],
+      "burgos": ["Burgos", "E"],
+      "caceres": ["Cáceres", "D"],
+      "cadiz": ["Cádiz", "A"],
+      "cantabria": ["Cantabria", "C"],
+      "castellon": ["Castellón", "B"], "castello": ["Castellón", "B"],
+      "ciudad real": ["Ciudad Real", "D"],
+      "cordoba": ["Córdoba", "B"],
+      "a coruna": ["A Coruña", "C"], "la coruna": ["A Coruña", "C"], "coruna": ["A Coruña", "C"],
+      "cuenca": ["Cuenca", "D"],
+      "girona": ["Girona", "C"], "gerona": ["Girona", "C"],
+      "granada": ["Granada", "D"],
+      "guadalajara": ["Guadalajara", "D"],
+      "gipuzkoa": ["Gipuzkoa", "C"], "guipuzcoa": ["Gipuzkoa", "C"],
+      "huelva": ["Huelva", "B"],
+      "huesca": ["Huesca", "D"],
+      "illes balears": ["Illes Balears", "B"], "islas baleares": ["Illes Balears", "B"],
+      "baleares": ["Illes Balears", "B"], "balears": ["Illes Balears", "B"],
+      "jaen": ["Jaén", "D"],
+      "leon": ["León", "E"],
+      "lleida": ["Lleida", "D"], "lerida": ["Lleida", "D"],
+      "lugo": ["Lugo", "C"],
+      "madrid": ["Madrid", "D"],
+      "malaga": ["Málaga", "A"],
+      "murcia": ["Murcia", "B"],
+      "navarra": ["Navarra", "D"],
+      "ourense": ["Ourense", "C"], "orense": ["Ourense", "C"],
+      "palencia": ["Palencia", "D"],
+      "las palmas": ["Las Palmas", "A"],
+      "pontevedra": ["Pontevedra", "C"],
+      "la rioja": ["La Rioja", "D"], "rioja": ["La Rioja", "D"],
+      "salamanca": ["Salamanca", "D"],
+      "santa cruz de tenerife": ["Santa Cruz de Tenerife", "A"],
+      "segovia": ["Segovia", "E"],
+      "sevilla": ["Sevilla", "B"],
+      "soria": ["Soria", "E"],
+      "tarragona": ["Tarragona", "C"],
+      "teruel": ["Teruel", "E"],
+      "toledo": ["Toledo", "D"],
+      "valencia": ["Valencia", "B"],
+      "valladolid": ["Valladolid", "D"],
+      "bizkaia": ["Bizkaia", "C"], "vizcaya": ["Bizkaia", "C"],
+      "zamora": ["Zamora", "D"],
+      "zaragoza": ["Zaragoza", "D"],
+      "ceuta": ["Ceuta", "A"],
+      "melilla": ["Melilla", "A"]
+    };
+
+    const PREGUNTAS = [
+      {
+        id: 1,
+        variable: "ubicacion",
+        texto: "Indica el nombre oficial de la provincia española donde se ubica la vivienda:",
+        ayuda: "Si no sabes qué contestar, escribe \"Lo desconozco\".",
+        tipo: "texto",
+        placeholder: "Ej. Jaén, Madrid, Barcelona",
+        error: "Error: El nombre introducido no corresponde con ninguna provincia oficial de España. Por favor, escribe una provincia válida (ej. Jaén, Madrid, Barcelona) o \"Lo desconozco\"."
+      },
+      {
+        id: 2,
+        variable: "superficie_util_m2",
+        texto: "Introduce la superficie útil de la vivienda en metros cuadrados (m²):",
+        tipo: "texto",
+        placeholder: "Ej. 92.5",
+        ayuda: "Si no sabes qué contestar, escribe \"Lo desconozco\".",
+        error: "Error: Introduce una superficie mayor que 10 y menor que 1000 m²."
+      },
+      {
+        id: 3,
+        variable: "tipo_vivienda",
+        texto: "Selecciona la tipología de la vivienda:",
+        tipo: "opciones",
+        error: "Error: Opción no válida. Por favor, introduce un número del 1 al 4.",
+        opciones: [
+          ["Piso intermedio", "Vivienda situada en una planta intermedia de un bloque, con otros pisos calefactados tanto encima como debajo.", "piso_intermedio"],
+          ["Último piso / Ático", "Vivienda situada en la planta superior del edificio, cuyo techo linda directamente con la cubierta, azotea o tejado exterior.", "atico"],
+          ["Vivienda unifamiliar", "Casa independiente, pareada o adosada que cuenta con fachadas y cubierta propias expuestas al exterior.", "unifamiliar"],
+          ["Lo desconozco", "No dispongo de este dato en este momento.", "piso_intermedio"]
+        ]
+      },
+      {
+        id: 4,
+        variable: "año_construccion",
+        texto: "Indica el año exacto de construcción del edificio o el año de su última reforma integral de envolvente e instalaciones:",
+        tipo: "texto",
+        placeholder: "Ej. 1984",
+        ayuda: "Si no sabes qué contestar, escribe \"Lo desconozco\".",
+        error: "Error: El año tiene que estar entre 1800 y 2026."
+      },
+      {
+        id: 5,
+        variable: "aislamiento_fachada",
+        texto: "¿Dispone la fachada de la vivienda de aislamiento térmico?",
+        tipo: "opciones",
+        error: "Error: Respuesta no reconocida. Selecciona 1 (Sí), 2 (No) o 3 (Lo desconozco).",
+        opciones: [
+          ["Sí", "Los muros exteriores cuentan con algún material aislante (como espuma proyectada, lana mineral en cámara de aire, planchas aislantes por el interior o sistema SATE por el exterior).", true],
+          ["No", "Los muros exteriores son de ladrillo o piedra maciza de construcción antigua, sin ningún material aislante añadido en su interior o exterior.", false],
+          ["Lo desconozco", "No sé si los muros cuentan con aislamiento interno o externo.", null]
+        ]
+      },
+      {
+        id: 6,
+        variable: "aislamiento_cubierta",
+        texto: "¿Dispone la cubierta o tejado del edificio de aislamiento térmico?",
+        tipo: "opciones",
+        error: "Error: Respuesta no reconocida. Selecciona 1 (Sí), 2 (No) o 3 (Lo desconozco).",
+        opciones: [
+          ["Sí", "El tejado o azotea cuenta con paneles aislantes (como poliestireno extruido o lana de roca) que frenan la pérdida de calor hacia el cielo.", true],
+          ["No", "La cubierta o tejado es antiguo y carece de capas de material aislante térmico.", false],
+          ["Lo desconozco", "No sé si la cubierta del edificio dispone de aislamiento.", null]
+        ]
+      },
+      {
+        id: 7,
+        variable: "tipo_ventanas",
+        texto: "¿Cuentan las ventanas de la vivienda con aislamiento térmico?",
+        tipo: "opciones",
+        error: "Error: Respuesta no reconocida. Selecciona 1 (Sí), 2 (No) o 3 (Lo desconozco).",
+        opciones: [
+          ["Sí", "Ventanas modernas con doble cristal (tipo Climalit con cámara de aire o gas) y marcos de PVC, madera maciza o aluminio con rotura de puente térmico (RPT).", "si"],
+          ["No", "Ventanas antiguas de un solo cristal (vidrio simple) y marcos metálicos finos o de madera desgastada por los que suele filtrarse aire.", "simple"],
+          ["Lo desconozco", "No sé qué tipo de acristalamiento o perfilería tienen las ventanas.", null]
+        ]
+      },
+      {
+        id: 8,
+        variable: "sistema_calefaccion",
+        texto: "¿Cuál es el sistema principal de calefacción de la vivienda?",
+        tipo: "opciones",
+        error: "Error: Opción no válida. Introduce un número del 1 al 5.",
+        opciones: [
+          ["Caldera de gas natural", "Caldera conectada a la red de gas canalizado que calienta agua para radiadores o suelo radiante.", "gas_natural"],
+          ["Caldera de gasóleo (gasoil)", "Caldera que quema combustible líquido almacenado en un depósito propio o comunitario.", "gasoleo"],
+          ["Radiadores eléctricos o acumuladores", "Emisores térmicos enchufados a la red eléctrica, convectores o suelo radiante eléctrico.", "electrico_efecto_joule"],
+          ["Bomba de calor / Aerotermia / Splits", "Equipos de alta eficiencia que extraen energía del aire exterior para calentar la vivienda.", "bomba_calor_aerotermia"],
+          ["Lo desconozco", "No conozco qué tecnología emplea el sistema de calefacción.", "gas_natural"]
+        ]
+      },
+      {
+        id: 9,
+        variable: "factura_anual_estimada_eur",
+        texto: "Introduce tu gasto energético anual total aproximado en euros (€/año), sumando las facturas de electricidad y combustible (gas/gasoil) de todo un año:",
+        tipo: "texto",
+        placeholder: "Ej. 1350.50",
+        ayuda: "Si no sabes qué contestar, escribe \"Lo desconozco\".",
+        error: "Error: Introduce un importe mayor que 0."
+      },
+      {
+        id: 10,
+        variable: "vivienda_habitual",
+        texto: "¿Es la vivienda tu residencia habitual?",
+        tipo: "opciones",
+        error: "Error: Respuesta no reconocida. Selecciona 1 (Sí), 2 (No) o 3 (Lo desconozco).",
+        notaPresuncion: "Se asume que es la vivienda habitual, porque es el caso más frecuente y es el que permite la deducción en la declaración de la renta.",
+        opciones: [
+          ["Sí", "Vives en ella como residencia habitual.", "si"],
+          ["No", "Es una segunda residencia, un alquiler que no ocupas o un inmueble vacío.", "no"],
+          ["Lo desconozco", "No puedo confirmarlo ahora.", "si"]
+        ]
+      },
+      {
+        id: 11,
+        variable: "municipio",
+        texto: "Escribe el municipio donde está la vivienda:",
+        tipo: "texto",
+        placeholder: "Ej. Andújar",
+        ayuda: "Si no sabes qué contestar, escribe \"Lo desconozco\".",
+        error: "Error: Escribe el nombre del municipio."
+      },
+      {
+        id: 12,
+        variable: "regimen_tenencia",
+        texto: "¿Quién promovería la rehabilitación?",
+        tipo: "opciones",
+        error: "Error: Opción no válida. Introduce un número del 1 al 4.",
+        notaPresuncion: "Se asume que quien pide la ayuda es el propietario, porque es quien habitualmente contrata la obra cuando no se indica otra cosa.",
+        opciones: [
+          ["Propietario", "La vivienda es tuya y tú encargarías las obras.", "propietario"],
+          ["Comunidad de propietarios", "La actuación la acuerda la comunidad del edificio.", "comunidad"],
+          ["Inquilino", "Vives de alquiler y la obra dependería del propietario.", "inquilino"],
+          ["Lo desconozco", "No puedo confirmarlo ahora.", "propietario"]
+        ]
+      },
+      {
+        id: 13,
+        variable: "ambito_actuacion",
+        texto: "¿La rehabilitación afectaría solo a tu vivienda o al edificio completo?",
+        tipo: "opciones",
+        error: "Error: Opción no válida. Introduce un número del 1 al 3.",
+        opciones: [
+          ["Solo mi vivienda", "Las obras se limitan a tu casa: ventanas, instalación propia o una parte de la fachada.", "vivienda"],
+          ["Edificio completo", "La comunidad, o la casa unifamiliar entera, rehabilita la envolvente.", "edificio"],
+          ["Lo desconozco", "Todavía no está decidido el alcance.", null]
+        ]
+      },
+      {
+        id: 14,
+        variable: "fotovoltaica",
+        texto: "¿Quieres valorar también una instalación fotovoltaica?",
+        tipo: "opciones",
+        error: "Error: Respuesta no reconocida. Selecciona 1 (Sí), 2 (No) o 3 (Lo desconozco).",
+        notaPresuncion: "Se asume que no se instalan placas solares, porque no se ha pedido valorarlas.",
+        opciones: [
+          ["Sí", "Me interesa añadir paneles solares en esta rehabilitación.", "si"],
+          ["No", "De momento solo valoro la envolvente y la calefacción.", "no"],
+          ["Lo desconozco", "No lo he decidido.", "no"]
+        ]
+      },
+      {
+        id: 15,
+        variable: "estado_obras",
+        texto: "¿En qué situación están las obras de rehabilitación energética?",
+        tipo: "opciones",
+        error: "Error: Opción no válida. Introduce un número del 1 al 4.",
+        notaPresuncion: "Se asume que las obras no han empezado, porque este cuestionario se hace antes de decidir la rehabilitación.",
+        opciones: [
+          ["No han empezado", "Aún no hay obra ni encargo de ejecución.", "no_iniciadas"],
+          ["Están en curso", "La obra ya ha comenzado.", "en_curso"],
+          ["Ya han terminado", "Las obras están acabadas y conservo facturas.", "terminadas"],
+          ["Lo desconozco", "No puedo confirmarlo ahora.", "no_iniciadas"]
+        ]
+      },
+      {
+        id: 16,
+        variable: "certificado_cee",
+        texto: "¿La vivienda tiene un certificado de eficiencia energética vigente?",
+        tipo: "opciones",
+        error: "Error: Respuesta no reconocida. Selecciona 1 (Sí), 2 (No) o 3 (Lo desconozco).",
+        notaPresuncion: "Se asume que no hay un certificado de eficiencia energética vigente, porque no consta que se haya hecho y hay que encargarlo antes de pedir la ayuda.",
+        opciones: [
+          ["Sí", "Existe un certificado vigente, registrado o en tu poder.", "si"],
+          ["No", "Nunca se ha hecho o está caducado.", "no"],
+          ["Lo desconozco", "No sé si el edificio o la vivienda lo tienen.", "no"]
+        ]
+      }
+    ];
+
+    const respuestas = {};
+    let indice = 0;
+    let seleccion = null;
+    let guardando = false;
+
+    const card = document.getElementById("card");
+    const steps = document.getElementById("steps");
+    const dictBody = document.getElementById("dictBody");
+    const dictTable = document.getElementById("dictTable");
+    const emptyDict = document.getElementById("emptyDict");
+    const dictamen = document.getElementById("dictamen");
+    const fileStatus = document.getElementById("fileStatus");
+
+    function normalizar(texto) {
+      return texto.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, " ");
+    }
+
+    function esDesconocido(texto) {
+      return normalizar(texto) === "lo desconozco";
+    }
+
+    function parseNumero(texto) {
+      const limpio = texto.trim().replace(/\s/g, "").replace(",", ".");
+      if (!/^[-+]?\d+(\.\d+)?$/.test(limpio)) return null;
+      const valor = Number(limpio);
+      return Number.isFinite(valor) ? valor : null;
+    }
+
+    function habitantes(numero) {
+      return Number(numero).toLocaleString("es-ES");
+    }
+
+    function claveMunicipio(texto) {
+      const nombre = normalizar(texto);
+      if (!nombre || typeof NOMBRE_INE === "undefined") return null;
+      const provincia = respuestas[1];
+      if (provincia && !provincia.presumido) {
+        const candidata = normalizar(provincia.contestacion) + "|" + nombre;
+        if (Object.prototype.hasOwnProperty.call(NOMBRE_INE, candidata)) return candidata;
+      }
+      const coincidencias = Object.keys(NOMBRE_INE).filter((clave) => clave.endsWith("|" + nombre));
+      return coincidencias.length === 1 ? coincidencias[0] : null;
+    }
+
+    function fichaPoblacion() {
+      const municipio = respuestas[11];
+      if (!municipio || typeof POBLACION_INE === "undefined") return null;
+      if (municipio.presumido || !municipio.valor) {
+        return {
+          pequeno: false,
+          presumido: true,
+          contestacion: "No, más de 5.000 habitantes",
+          nota: "Se asume que el municipio tiene más de 5.000 habitantes, porque no se ha indicado el nombre y, sin él, no se puede consultar el padrón del INE."
+        };
+      }
+      const clave = claveMunicipio(municipio.valor);
+      const poblacion = clave ? POBLACION_INE[clave] : null;
+      const oficial = clave ? NOMBRE_INE[clave] : municipio.contestacion;
+      if (poblacion == null) {
+        return {
+          pequeno: false,
+          presumido: true,
+          contestacion: "No, más de 5.000 habitantes",
+          nota: "Se asume que " + municipio.contestacion + " tiene más de 5.000 habitantes, porque ese nombre no coincide con un municipio del padrón del INE de " + AÑO_PADRON + "."
+        };
+      }
+      const pequeno = poblacion <= 5000;
+      return {
+        pequeno,
+        presumido: false,
+        poblacion,
+        nombre: oficial,
+        contestacion: pequeno ? "Sí, 5.000 habitantes o menos" : "No, más de 5.000 habitantes",
+        nota: oficial + " tiene " + habitantes(poblacion) + " habitantes según el padrón del INE de " + AÑO_PADRON + (pequeno
+          ? ", así que no supera los 5.000 y puede estudiar la ayuda para municipios pequeños."
+          : ", así que supera los 5.000 habitantes.")
+      };
+    }
+
+    function anioEfectivo() {
+      const anio = respuestas[4];
+      return anio ? Number(anio.valor) : 1978;
+    }
+
+    function aislamientoPorAnio() {
+      return anioEfectivo() > 1980;
+    }
+
+    function ventanasPorAnio() {
+      const anio = anioEfectivo();
+      if (anio <= 1980) return "simple";
+      if (anio <= 2006) return "doble_estandar";
+      return "doble_bajo_emisivo";
+    }
+
+    function ventanasSiExplicitas() {
+      return anioEfectivo() >= 2007 ? "doble_bajo_emisivo" : "doble_estandar";
+    }
+
+    function resolver(pregunta, entrada) {
+      const id = pregunta.id;
+      if (pregunta.tipo === "texto") {
+        const texto = entrada.trim();
+        if (id === 1) {
+          if (esDesconocido(texto)) {
+            return { contestacion: "Lo desconozco", valor: "D", presumido: true, nota: "Se asume que la vivienda está en la zona climática D, porque es la más habitual en el interior de la península cuando no se indica la provincia." };
+          }
+          const provincia = PROVINCIAS[normalizar(texto)];
+          if (!provincia) return null;
+          return { contestacion: provincia[0], valor: provincia[1], presumido: false, nota: "Zona climática CTE " + provincia[1] + "." };
+        }
+        if (id === 2) {
+          if (esDesconocido(texto)) {
+            return { contestacion: "Lo desconozco", valor: 85, presumido: true, nota: "Se asume que la superficie es de 85 m², porque es la superficie media de la vivienda principal en España según el INE." };
+          }
+          const valor = parseNumero(texto);
+          if (valor === null || valor <= 10 || valor >= 1000) return null;
+          return { contestacion: String(valor), valor, presumido: false, nota: "" };
+        }
+        if (id === 4) {
+          if (esDesconocido(texto)) {
+            return { contestacion: "Lo desconozco", valor: 1978, presumido: true, nota: "Se asume que el edificio es de 1978, porque es un año representativo de las viviendas anteriores a la norma de aislamiento de 1979." };
+          }
+          if (!/^\d+$/.test(texto.trim())) return null;
+          const valor = Number(texto.trim());
+          if (valor < 1800 || valor > ANIO_ACTUAL) return null;
+          return { contestacion: String(valor), valor, presumido: false, nota: "" };
+        }
+        if (id === 9) {
+          if (esDesconocido(texto)) {
+            return { contestacion: "Lo desconozco", valor: 1200, presumido: true, nota: "Se asume que el gasto anual es de 1.200 €, porque es el gasto energético medio de un hogar según el Instituto para la Diversificación y Ahorro de la Energía." };
+          }
+          const valor = parseNumero(texto);
+          if (valor === null || valor <= 0) return null;
+          return { contestacion: String(valor), valor, presumido: false, nota: "" };
+        }
+        if (id === 11) {
+          if (esDesconocido(texto)) {
+            return { contestacion: "Lo desconozco", valor: "", presumido: true, nota: "Se asume que el municipio tiene más de 5.000 habitantes, porque no se ha indicado el nombre y, sin él, no se puede consultar el padrón del INE." };
+          }
+          if (texto.trim().length < 2) return null;
+          const clave = claveMunicipio(texto);
+          const oficial = clave ? NOMBRE_INE[clave] : texto.trim();
+          return { contestacion: oficial, valor: oficial, presumido: false, nota: "" };
+        }
+      }
+
+      const opcion = pregunta.opciones[entrada];
+      if (!opcion) return null;
+      const etiqueta = opcion[0];
+      const codigo = opcion[2];
+      const presumido = etiqueta === "Lo desconozco";
+
+      if (id === 3) {
+        return {
+          contestacion: etiqueta,
+          valor: codigo,
+          presumido,
+          nota: presumido ? "Se asume que es un piso intermedio, porque es la situación más frecuente cuando no se conoce la planta, y en ese caso el techo y el suelo no dan al exterior." : ""
+        };
+      }
+      if (id === 5 || id === 6) {
+        const valor = presumido ? aislamientoPorAnio() : codigo;
+        const elemento = id === 5 ? "la fachada" : "la cubierta";
+        const nota = presumido
+          ? (valor
+            ? "Se asume que " + elemento + " tiene aislamiento, porque el edificio es de " + anioEfectivo() + " y, a partir de 1981, ya era habitual aislar."
+            : "Se asume que " + elemento + " no tiene aislamiento, porque el edificio es de " + anioEfectivo() + " y hasta 1980 lo habitual era construir sin aislamiento.")
+          : "";
+        return { contestacion: etiqueta, valor, presumido, nota };
+      }
+      if (id === 7) {
+        let valor = codigo;
+        if (presumido) valor = ventanasPorAnio();
+        else if (codigo === "si") valor = ventanasSiExplicitas();
+        let textoVentana = "un solo cristal";
+        if (valor === "doble_estandar") textoVentana = "doble cristal corriente";
+        if (valor === "doble_bajo_emisivo") textoVentana = "doble cristal de baja emisividad";
+        const nota = presumido
+          ? "Se asume que las ventanas tienen " + textoVentana + ", porque el edificio es de " + anioEfectivo() + " y ese era el acristalamiento habitual en esa época."
+          : "";
+        return { contestacion: etiqueta, valor, presumido, nota };
+      }
+      if (id === 8) {
+        return {
+          contestacion: etiqueta,
+          valor: codigo,
+          presumido,
+          nota: presumido ? "Se asume que la calefacción es de gas natural, porque es el sistema más extendido cuando no se conoce el equipo." : ""
+        };
+      }
+      if (id === 13 && presumido) {
+        const tipo = respuestas[3] ? respuestas[3].valor : "piso_intermedio";
+        const esUnifamiliar = String(tipo).indexOf("unifamiliar") === 0;
+        return {
+          contestacion: etiqueta,
+          valor: esUnifamiliar ? "edificio" : "vivienda",
+          presumido: true,
+          nota: esUnifamiliar
+            ? "Se asume que la obra afecta al edificio completo, porque en una casa unifamiliar la vivienda y el edificio son el mismo."
+            : "Se asume que la obra afecta solo a la vivienda, porque no se ha indicado un alcance mayor y, en un piso, eso corresponde a la ayuda para una vivienda."
+        };
+      }
+      if (pregunta.opciones) {
+        return {
+          contestacion: etiqueta,
+          valor: codigo,
+          presumido,
+          nota: presumido ? (pregunta.notaPresuncion || "") : ""
+        };
+      }
+      return null;
+    }
+
+    function textoPregunta(pregunta) {
+      const cuerpo = pregunta.texto.replace(/^\d+\/\d+\.\s*/, "");
+      return pregunta.id + "/" + PREGUNTAS.length + ". " + cuerpo;
+    }
+
+    function recalcularPresunciones() {
+      [5, 6, 7].forEach((id) => {
+        const previa = respuestas[id];
+        if (!previa || !previa.presumido) return;
+        const pregunta = PREGUNTAS[id - 1];
+        const indiceDesconocido = pregunta.opciones.findIndex((opcion) => opcion[0] === "Lo desconozco");
+        const nueva = resolver(pregunta, indiceDesconocido);
+        nueva.variable = pregunta.variable;
+        respuestas[id] = nueva;
+      });
+    }
+
+    function renderPasos() {
+      steps.innerHTML = "";
+      PREGUNTAS.forEach((pregunta, i) => {
+        const boton = document.createElement("button");
+        boton.type = "button";
+        boton.className = "step" + (respuestas[pregunta.id] ? " done" : "") + (i === indice ? " current" : "");
+        boton.title = "Pregunta " + pregunta.id;
+        boton.disabled = !respuestas[pregunta.id] && i !== indice;
+        boton.addEventListener("click", () => {
+          if (respuestas[pregunta.id] || i === indice) {
+            indice = i;
+            render();
+          }
+        });
+        steps.appendChild(boton);
+      });
+    }
+
+    function renderDiccionario() {
+      const ids = Object.keys(respuestas).map(Number).sort((a, b) => a - b);
+      emptyDict.hidden = ids.length > 0;
+      dictTable.hidden = ids.length === 0;
+      dictBody.innerHTML = "";
+      ids.forEach((id) => {
+        const fila = document.createElement("tr");
+        const item = respuestas[id];
+        [id, item.contestacion].forEach((texto) => {
+          const celda = document.createElement("td");
+          celda.textContent = texto;
+          fila.appendChild(celda);
+        });
+        dictBody.appendChild(fila);
+      });
+
+      const avisos = ids
+        .map((id) => respuestas[id])
+        .filter((item) => item.presumido && item.nota);
+      const poblacion = fichaPoblacion();
+      if (poblacion && poblacion.presumido && poblacion.nota) avisos.push(poblacion);
+      const tituloDictamen = Object.keys(respuestas).length === PREGUNTAS.length ? "Dictamen de presunciones" : "Presunciones aplicadas";
+      if (avisos.length) {
+        dictamen.hidden = false;
+        dictamen.innerHTML = "<h2>" + tituloDictamen + "</h2><ul>" +
+          avisos.map((item) => "<li>" + item.nota + "</li>").join("") +
+          "</ul>";
+      } else if (Object.keys(respuestas).length === PREGUNTAS.length) {
+        dictamen.hidden = false;
+        dictamen.innerHTML = "<h2>Dictamen de presunciones</h2><p>Todas las respuestas las ha aportado el usuario. No se ha aplicado ninguna presunción.</p>";
+      } else {
+        dictamen.hidden = true;
+        dictamen.innerHTML = "";
+      }
+    }
+
+    function formatearValor(valor) {
+      if (valor === true) return "Sí";
+      if (valor === false) return "No";
+      return String(valor);
+    }
+
+    function render() {
+      renderPasos();
+      renderDiccionario();
+      const pregunta = PREGUNTAS[indice];
+      seleccion = null;
+      const previa = respuestas[pregunta.id];
+
+      const bloque = document.createElement("div");
+      const titulo = document.createElement("h2");
+      titulo.className = "question";
+      titulo.textContent = textoPregunta(pregunta);
+      bloque.appendChild(titulo);
+      if (pregunta.ayuda) {
+        const ayuda = document.createElement("p");
+        ayuda.className = "ayuda";
+        ayuda.textContent = pregunta.ayuda;
+        bloque.appendChild(ayuda);
+      }
+
+      if (pregunta.tipo === "texto") {
+        const etiqueta = document.createElement("label");
+        etiqueta.className = "field";
+        etiqueta.htmlFor = "respuesta";
+        etiqueta.textContent = "Respuesta";
+        const campo = document.createElement("input");
+        campo.id = "respuesta";
+        campo.type = "text";
+        campo.placeholder = pregunta.placeholder;
+        campo.autocomplete = "off";
+        if (previa) campo.value = previa.contestacion === "Lo desconozco" ? "Lo desconozco" : previa.contestacion;
+        campo.addEventListener("keydown", (evento) => {
+          if (evento.key === "Enter") confirmar();
+        });
+        bloque.appendChild(etiqueta);
+        bloque.appendChild(campo);
+      } else {
+        const lista = document.createElement("div");
+        lista.className = "options";
+        pregunta.opciones.forEach((opcion, i) => {
+          const boton = document.createElement("button");
+          boton.type = "button";
+          boton.className = "option";
+          if (previa && previa.contestacion === opcion[0]) {
+            boton.classList.add("selected");
+            seleccion = i;
+          }
+          boton.innerHTML = "<div class=\"num\">" + (i + 1) + "</div><div><strong></strong><span></span></div>";
+          boton.querySelector("strong").textContent = opcion[0];
+          boton.querySelector("span").textContent = opcion[1];
+          boton.addEventListener("click", () => {
+            seleccion = i;
+            lista.querySelectorAll(".option").forEach((nodo) => nodo.classList.remove("selected"));
+            boton.classList.add("selected");
+            document.getElementById("error").classList.remove("show");
+          });
+          lista.appendChild(boton);
+        });
+        bloque.appendChild(lista);
+      }
+
+      const error = document.createElement("div");
+      error.id = "error";
+      error.className = "error";
+      error.textContent = pregunta.error;
+      bloque.appendChild(error);
+
+      const aviso = document.createElement("div");
+      aviso.id = "aviso";
+      aviso.className = "notice";
+      bloque.appendChild(aviso);
+
+      const acciones = document.createElement("div");
+      acciones.className = "actions";
+      const atras = document.createElement("button");
+      atras.type = "button";
+      atras.className = "ghost";
+      atras.textContent = "Anterior";
+      atras.disabled = indice === 0;
+      atras.addEventListener("click", () => {
+        indice -= 1;
+        render();
+      });
+      const seguir = document.createElement("button");
+      seguir.type = "button";
+      seguir.className = "primary";
+      seguir.textContent = "Guardar respuesta";
+      seguir.addEventListener("click", confirmar);
+      acciones.appendChild(atras);
+      acciones.appendChild(seguir);
+      bloque.appendChild(acciones);
+
+      card.innerHTML = "";
+      card.appendChild(bloque);
+      const campo = document.getElementById("respuesta");
+      if (campo) campo.focus();
+    }
+
+    async function confirmar() {
+      const pregunta = PREGUNTAS[indice];
+      const error = document.getElementById("error");
+      const entrada = pregunta.tipo === "texto"
+        ? document.getElementById("respuesta").value
+        : seleccion;
+      if (pregunta.tipo === "texto" && !String(entrada).trim()) {
+        error.classList.add("show");
+        return;
+      }
+      if (pregunta.tipo === "opciones" && entrada === null) {
+        error.classList.add("show");
+        return;
+      }
+      const resultado = resolver(pregunta, entrada);
+      if (!resultado) {
+        error.classList.add("show");
+        return;
+      }
+      resultado.variable = pregunta.variable;
+      respuestas[pregunta.id] = resultado;
+      if (pregunta.id === 4) recalcularPresunciones();
+      renderDiccionario();
+      const aviso = document.getElementById("aviso");
+      if (resultado.nota) {
+        aviso.textContent = resultado.nota;
+        aviso.classList.add("show");
+      }
+      await guardarExcel();
+      if (indice < PREGUNTAS.length - 1) {
+        indice += 1;
+        render();
+      } else {
+        renderFinalizado();
+      }
+    }
+
+    function renderFinalizado() {
+      renderPasos();
+      renderDiccionario();
+      const bloque = document.createElement("div");
+      bloque.className = "procesando";
+      const titulo = document.createElement("h2");
+      titulo.textContent = "Cuestionario completo";
+      const texto = document.createElement("p");
+      texto.textContent = "Las " + PREGUNTAS.length + " respuestas ya están guardadas. Pulsa Finalizado para calcular el balance térmico.";
+      const acciones = document.createElement("div");
+      acciones.className = "actions";
+      const atras = document.createElement("button");
+      atras.type = "button";
+      atras.className = "ghost";
+      atras.textContent = "Revisar respuestas";
+      atras.addEventListener("click", () => {
+        indice = PREGUNTAS.length - 1;
+        render();
+      });
+      const finalizarBtn = document.createElement("button");
+      finalizarBtn.type = "button";
+      finalizarBtn.className = "primary";
+      finalizarBtn.textContent = "Finalizado";
+      finalizarBtn.addEventListener("click", finalizar);
+      acciones.appendChild(atras);
+      acciones.appendChild(finalizarBtn);
+      bloque.appendChild(titulo);
+      bloque.appendChild(texto);
+      bloque.appendChild(acciones);
+      card.innerHTML = "";
+      card.appendChild(bloque);
+    }
+
+    function mostrarProcesando() {
+      const bloque = document.createElement("div");
+      bloque.className = "procesando";
+      const spinner = document.createElement("div");
+      spinner.className = "spinner";
+      spinner.setAttribute("role", "status");
+      const titulo = document.createElement("h2");
+      titulo.textContent = "Procesando tus datos";
+      const texto = document.createElement("p");
+      texto.textContent = "El motor térmico está calculando el balance de la vivienda.";
+      bloque.appendChild(spinner);
+      bloque.appendChild(titulo);
+      bloque.appendChild(texto);
+      card.innerHTML = "";
+      card.appendChild(bloque);
+    }
+
+    function numeroEs(valor, sufijo) {
+      const formato = new Intl.NumberFormat("es-ES", { maximumFractionDigits: 2 });
+      return formato.format(Number(valor)) + (sufijo ? " " + sufijo : "");
+    }
+
+    function anadirProsa(contenedor, titulo, texto, esError) {
+      const encabezado = document.createElement("h3");
+      encabezado.textContent = titulo;
+      const parrafo = document.createElement("p");
+      parrafo.className = esError ? "error show" : "prosa";
+      parrafo.textContent = texto;
+      contenedor.appendChild(encabezado);
+      contenedor.appendChild(parrafo);
+    }
+
+    function pintarResultado(data) {
+      const bloque = document.createElement("div");
+      bloque.className = "resultado";
+      const titulo = document.createElement("h2");
+      titulo.textContent = "Resultado de la auditoría";
+      bloque.appendChild(titulo);
+
+      const termico = data.termico || {};
+      const balance = termico.balance_energetico || {};
+      const ayudas = termico.dictamen_ayudas_rd853 || {};
+      const metricas = document.createElement("div");
+      metricas.className = "metricas";
+      [
+        ["Reducción de consumo", numeroEs(balance.porcentaje_reduccion_consumo, "%")],
+        ["Subvención RD 853", numeroEs(ayudas.tramo_subvencion_concedido_pct, "%")],
+        ["Ayuda máxima", numeroEs(ayudas.cuantia_maxima_subvencion_eur, "€")],
+        ["Ahorro anual", numeroEs(ayudas.ahorro_factura_estimado_eur_año, "€")]
+      ].forEach(([etiqueta, cifra]) => {
+        const caja = document.createElement("div");
+        caja.className = "metrica";
+        const nombre = document.createElement("span");
+        nombre.textContent = etiqueta;
+        const valor = document.createElement("strong");
+        valor.textContent = cifra;
+        caja.appendChild(nombre);
+        caja.appendChild(valor);
+        metricas.appendChild(caja);
+      });
+      bloque.appendChild(metricas);
+
+      const estado = document.createElement("p");
+      estado.id = "estadoInforme";
+      estado.className = "notice";
+      bloque.appendChild(estado);
+
+      const acciones = document.createElement("div");
+      acciones.className = "actions";
+      const generar = document.createElement("button");
+      generar.type = "button";
+      generar.className = "primary";
+      generar.textContent = "Generar informe de auditoría";
+      generar.addEventListener("click", generarInforme);
+      const volver = document.createElement("button");
+      volver.type = "button";
+      volver.className = "ghost";
+      volver.textContent = "Volver al cuestionario";
+      volver.addEventListener("click", renderFinalizado);
+      acciones.appendChild(generar);
+      acciones.appendChild(volver);
+      bloque.appendChild(acciones);
+      card.innerHTML = "";
+      card.appendChild(bloque);
+    }
+
+    function mostrarVisor(htmlInforme, pdfBase64) {
+      let visor = document.getElementById("visorInforme");
+      if (!visor) {
+        visor = document.createElement("div");
+        visor.id = "visorInforme";
+        document.body.appendChild(visor);
+      }
+      visor.innerHTML = "";
+      const barra = document.createElement("div");
+      barra.className = "barra";
+      const cerrar = document.createElement("button");
+      cerrar.type = "button";
+      cerrar.className = "ghost";
+      cerrar.textContent = "Volver al resumen";
+      cerrar.addEventListener("click", () => visor.remove());
+      const descargar = document.createElement("button");
+      descargar.type = "button";
+      descargar.className = "primary";
+      descargar.textContent = "Descargar informe";
+      descargar.addEventListener("click", () => {
+        const bytes = Uint8Array.from(atob(pdfBase64), (caracter) => caracter.charCodeAt(0));
+        const enlace = document.createElement("a");
+        enlace.href = URL.createObjectURL(new Blob([bytes], { type: "application/pdf" }));
+        enlace.download = "informe-auditoria-energetica.pdf";
+        enlace.click();
+        setTimeout(() => URL.revokeObjectURL(enlace.href), 1500);
+      });
+      barra.appendChild(cerrar);
+      barra.appendChild(descargar);
+      const marco = document.createElement("iframe");
+      marco.title = "Informe de auditoría energética";
+      marco.srcdoc = htmlInforme;
+      visor.appendChild(barra);
+      visor.appendChild(marco);
+    }
+
+    async function generarInforme() {
+      const estado = document.getElementById("estadoInforme");
+      if (estado) {
+        estado.classList.add("show");
+        estado.textContent = "Generando informe...";
+      }
+      try {
+        const respuesta = await fetch("/api/informe", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payloadExcel())
+        });
+        const data = await respuesta.json();
+        if (!respuesta.ok || !data.ok || !data.html || !data.pdf) {
+          throw new Error(data.error || "No se ha podido generar el informe.");
+        }
+        if (estado) {
+          estado.textContent = "";
+          estado.classList.remove("show");
+        }
+        mostrarVisor(data.html, data.pdf);
+      } catch (error) {
+        if (estado) estado.textContent = error.message;
+      }
+    }
+
+    function primeraRespuestaInvalida() {
+      for (const pregunta of PREGUNTAS) {
+        const previa = respuestas[pregunta.id];
+        if (!previa || pregunta.tipo !== "texto") continue;
+        if (!resolver(pregunta, previa.contestacion)) return pregunta;
+      }
+      return null;
+    }
+
+    async function finalizar() {
+      if (Object.keys(respuestas).length < PREGUNTAS.length) {
+        fileStatus.textContent = "Faltan respuestas antes de finalizar.";
+        return;
+      }
+      const invalida = primeraRespuestaInvalida();
+      if (invalida) {
+        indice = invalida.id - 1;
+        render();
+        const error = document.getElementById("error");
+        if (error) error.classList.add("show");
+        return;
+      }
+      mostrarProcesando();
+      try {
+        const respuesta = await fetch("/api/procesar", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payloadExcel())
+        });
+        const data = await respuesta.json();
+        if (!respuesta.ok || !data.ok) {
+          throw new Error(data.error || "No se ha podido calcular el dictamen.");
+        }
+        fileStatus.textContent = "Balance térmico calculado.";
+        pintarResultado(data);
+      } catch (error) {
+        const bloque = document.createElement("div");
+        bloque.className = "procesando";
+        const titulo = document.createElement("h2");
+        titulo.textContent = "No se ha podido completar el cálculo";
+        const texto = document.createElement("p");
+        texto.className = "error show";
+        texto.textContent = error.message;
+        const reintentar = document.createElement("button");
+        reintentar.type = "button";
+        reintentar.className = "primary";
+        reintentar.textContent = "Reintentar";
+        reintentar.addEventListener("click", finalizar);
+        bloque.appendChild(titulo);
+        bloque.appendChild(texto);
+        bloque.appendChild(reintentar);
+        card.innerHTML = "";
+        card.appendChild(bloque);
+      }
+    }
+
+    function diccionario() {
+      const objeto = {};
+      Object.keys(respuestas).map(Number).sort((a, b) => a - b).forEach((id) => {
+        objeto[id] = respuestas[id].contestacion;
+      });
+      return objeto;
+    }
+
+    function payloadExcel() {
+      const filas = Object.keys(respuestas).map(Number).sort((a, b) => a - b).map((id) => ({
+        pregunta: id,
+        contestacion: respuestas[id].contestacion,
+        variable: respuestas[id].variable,
+        valor_asignado: respuestas[id].valor,
+        presumido: respuestas[id].presumido,
+        nota: respuestas[id].nota || ""
+      }));
+      const poblacion = fichaPoblacion();
+      if (poblacion) {
+        filas.push({
+          pregunta: 18,
+          contestacion: poblacion.contestacion,
+          variable: "municipio_pequeno",
+          valor_asignado: poblacion.pequeno ? "si" : "no",
+          presumido: poblacion.presumido,
+          nota: poblacion.nota
+        });
+      }
+      return { diccionario: diccionario(), filas };
+    }
+
+    function filasExcel() {
+      const cabecera = ["pregunta", "contestacion", "variable", "valor_asignado", "presumido"];
+      const filas = [cabecera];
+      Object.keys(respuestas).map(Number).sort((a, b) => a - b).forEach((id) => {
+        const item = respuestas[id];
+        let valor = item.valor;
+        if (valor === true) valor = "Sí";
+        else if (valor === false) valor = "No";
+        filas.push([id, item.contestacion, item.variable, valor, item.presumido ? "Sí" : "No"]);
+      });
+      const poblacion = fichaPoblacion();
+      if (poblacion) {
+        filas.push([18, poblacion.contestacion, "municipio_pequeno", poblacion.pequeno ? "si" : "no", poblacion.presumido ? "Sí" : "No"]);
+      }
+      return filas;
+    }
+
+    function xmlEscape(valor) {
+      return String(valor)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function hojaXml(filas) {
+      const letras = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+      const rows = filas.map((fila, r) => {
+        const celdas = fila.map((valor, c) => {
+          const ref = letras[c] + (r + 1);
+          if (typeof valor === "number") {
+            return "<c r=\"" + ref + "\"><v>" + valor + "</v></c>";
+          }
+          return "<c r=\"" + ref + "\" t=\"inlineStr\"><is><t>" + xmlEscape(valor) + "</t></is></c>";
+        }).join("");
+        return "<row r=\"" + (r + 1) + "\">" + celdas + "</row>";
+      }).join("");
+      return "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" +
+        "<worksheet xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\"><sheetData>" +
+        rows + "</sheetData></worksheet>";
+    }
+
+    const CRC_TABLE = (() => {
+      const tabla = new Uint32Array(256);
+      for (let n = 0; n < 256; n++) {
+        let c = n;
+        for (let k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+        tabla[n] = c >>> 0;
+      }
+      return tabla;
+    })();
+
+    function crc32(data) {
+      let c = 0xFFFFFFFF;
+      for (let i = 0; i < data.length; i++) c = CRC_TABLE[(c ^ data[i]) & 0xFF] ^ (c >>> 8);
+      return (c ^ 0xFFFFFFFF) >>> 0;
+    }
+
+    function zipStore(archivos) {
+      const encoder = new TextEncoder();
+      const locales = [];
+      const centrales = [];
+      let offset = 0;
+      archivos.forEach((archivo) => {
+        const nombre = encoder.encode(archivo.nombre);
+        const crc = crc32(archivo.datos);
+        const local = new Uint8Array(30 + nombre.length);
+        const vista = new DataView(local.buffer);
+        vista.setUint32(0, 0x04034b50, true);
+        vista.setUint16(4, 20, true);
+        vista.setUint16(8, 0, true);
+        vista.setUint32(14, crc, true);
+        vista.setUint32(18, archivo.datos.length, true);
+        vista.setUint32(22, archivo.datos.length, true);
+        vista.setUint16(26, nombre.length, true);
+        local.set(nombre, 30);
+        locales.push(local, archivo.datos);
+
+        const central = new Uint8Array(46 + nombre.length);
+        const cv = new DataView(central.buffer);
+        cv.setUint32(0, 0x02014b50, true);
+        cv.setUint16(4, 20, true);
+        cv.setUint16(6, 20, true);
+        cv.setUint32(16, crc, true);
+        cv.setUint32(20, archivo.datos.length, true);
+        cv.setUint32(24, archivo.datos.length, true);
+        cv.setUint16(28, nombre.length, true);
+        cv.setUint32(42, offset, true);
+        central.set(nombre, 46);
+        centrales.push(central);
+        offset += local.length + archivo.datos.length;
+      });
+      const centralSize = centrales.reduce((suma, parte) => suma + parte.length, 0);
+      const eocd = new Uint8Array(22);
+      const ev = new DataView(eocd.buffer);
+      ev.setUint32(0, 0x06054b50, true);
+      ev.setUint16(8, archivos.length, true);
+      ev.setUint16(10, archivos.length, true);
+      ev.setUint32(12, centralSize, true);
+      ev.setUint32(16, offset, true);
+      return new Blob([...locales, ...centrales, eocd], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      });
+    }
+
+    function construirLibro() {
+      const encoder = new TextEncoder();
+      const diccionarioJson = JSON.stringify(diccionario());
+      const contenidoTipos = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" +
+        "<Types xmlns=\"http://schemas.openxmlformats.org/package/2006/content-types\">" +
+        "<Default Extension=\"rels\" ContentType=\"application/vnd.openxmlformats-package.relationships+xml\"/>" +
+        "<Default Extension=\"xml\" ContentType=\"application/xml\"/>" +
+        "<Override PartName=\"/xl/workbook.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml\"/>" +
+        "<Override PartName=\"/xl/worksheets/sheet1.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml\"/>" +
+        "<Override PartName=\"/xl/worksheets/sheet2.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml\"/>" +
+        "</Types>";
+      const rels = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" +
+        "<Relationships xmlns=\"http://schemas.openxmlformats.org/package/2006/relationships\">" +
+        "<Relationship Id=\"rId1\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument\" Target=\"xl/workbook.xml\"/>" +
+        "</Relationships>";
+      const libro = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" +
+        "<workbook xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\">" +
+        "<sheets><sheet name=\"Respuestas\" sheetId=\"1\" r:id=\"rId1\"/><sheet name=\"Diccionario\" sheetId=\"2\" r:id=\"rId2\"/></sheets></workbook>";
+      const libroRels = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" +
+        "<Relationships xmlns=\"http://schemas.openxmlformats.org/package/2006/relationships\">" +
+        "<Relationship Id=\"rId1\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet\" Target=\"worksheets/sheet1.xml\"/>" +
+        "<Relationship Id=\"rId2\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet\" Target=\"worksheets/sheet2.xml\"/>" +
+        "</Relationships>";
+      const hojaDiccionario = hojaXml([["diccionario"], [diccionarioJson]]);
+      const archivos = [
+        ["[Content_Types].xml", contenidoTipos],
+        ["_rels/.rels", rels],
+        ["xl/workbook.xml", libro],
+        ["xl/_rels/workbook.xml.rels", libroRels],
+        ["xl/worksheets/sheet1.xml", hojaXml(filasExcel())],
+        ["xl/worksheets/sheet2.xml", hojaDiccionario]
+      ].map(([nombre, texto]) => ({ nombre, datos: encoder.encode(texto) }));
+      return zipStore(archivos);
+    }
+
+    function descargar(blob) {
+      const enlace = document.createElement("a");
+      enlace.href = URL.createObjectURL(blob);
+      enlace.download = ARCHIVO;
+      enlace.click();
+      setTimeout(() => URL.revokeObjectURL(enlace.href), 1500);
+      fileStatus.textContent = "Descargado " + ARCHIVO + " con " + Object.keys(respuestas).length + " respuestas.";
+    }
+
+    async function guardarExcel() {
+      if (guardando) return;
+      guardando = true;
+      try {
+        const respuesta = await fetch("/api/respuestas", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payloadExcel())
+        });
+        if (respuesta.ok) {
+          const data = await respuesta.json();
+          fileStatus.textContent = "Respuestas guardadas en " + data.archivo + ".";
+          return;
+        }
+      } catch (error) {
+        fileStatus.textContent = "El servidor no está activo. Se descarga una copia.";
+      } finally {
+        guardando = false;
+      }
+      descargar(construirLibro());
+    }
+
+    document.getElementById("downloadBtn").addEventListener("click", () => {
+      if (!Object.keys(respuestas).length) {
+        fileStatus.textContent = "Todavía no hay respuestas que guardar.";
+        return;
+      }
+      descargar(construirLibro());
+    });
+
+    render();
+  </script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+﻿# pydantic: Valida los tipos de datos y modela de forma estricta el esquema de la vivienda (ViviendaModel).
+pydantic>=2.0
+
+# langchain: Proporciona las herramientas base, plantillas de instrucciones y conectores con los modelos de lenguaje.
+langchain>=0.2.0
+
+# langgraph: Controla el flujo del agente mediante grafos de estado para gestionar bucles, memoria y decisiones.
+langgraph>=0.1.0
+
+# langchain-core: Define las interfaces estándar y abstracciones fundamentales compartidas por todo el ecosistema LangChain.
+langchain-core>=0.2.0
+
+# numpy: Realiza operaciones matemáticas matriciales y soporte numérico para el motor de cálculo térmico.
+numpy
+
+# pandas: Permite estructurar y manipular tablas de datos técnicos, zonas climáticas y mediciones.
+pandas
+
+# chromadb: Base de datos vectorial local para almacenar e indexar los fragmentos de la normativa del RAG.
+chromadb
+
+# tiktoken: Calcula y cuenta los tokens de los textos para gestionar el límite de contexto del modelo.
+tiktoken
+
+# weasyprint: Convierte las plantillas HTML y hojas de estilo CSS en documentos PDF finales listos para imprimir.
+weasyprint
+
+# reportlab: Genera y maqueta elementos gráficos vectoriales y páginas dentro de documentos PDF.
+reportlab
+
+# jinja2: Motor de plantillas para rellenar dinámicamente datos de la vivienda en el informe HTML antes de pasarlo a PDF.
+jinja2
+
+# python-dotenv: Carga automáticamente las variables secretas y claves de API desde el archivo .env al entorno de ejecución.
+python-dotenv
+
+# pypdf: Extrae el texto de los PDF normativos de la carpeta RAG antes de indexarlos en ChromaDB.
+pypdf
